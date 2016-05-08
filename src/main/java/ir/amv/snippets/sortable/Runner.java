@@ -19,8 +19,27 @@ public class Runner {
 
     public static void main(String[] args) {
         try {
-            List<Listing> listings = GsonUtil.readFromFile("data/listings.txt", Listing.class);
-            List<Product> products = GsonUtil.readFromFile("data/products.txt", Product.class);
+            System.out.println("Arguments: [ListingFileName] [ProductsFileName] [OutputFileName]");
+            String listingFileName;
+            String productsFileName;
+            String outputFileName;
+            if (args.length > 0) {
+                listingFileName = args[0];
+            } else {
+                listingFileName = "data/listings.txt";
+            }
+            if (args.length > 1) {
+                productsFileName = args[1];
+            } else {
+                productsFileName = "data/products.txt";
+            }
+            if (args.length > 2) {
+                outputFileName = args[2];
+            } else {
+                outputFileName = "result.json";
+            }
+            List<Listing> listings = GsonUtil.readFromFile(listingFileName, Listing.class);
+            List<Product> products = GsonUtil.readFromFile(productsFileName, Product.class);
             Map<String, Result> resultsMap = new HashMap<String, Result>();
             List<Listing> notMatched = new ArrayList<Listing>();
             ProductFinder finder = new ProductFinder(products);
@@ -40,8 +59,8 @@ public class Runner {
                     notMatched.add(listing);
                 }
             }
-            GsonUtil.gson().toJson(resultsMap, new FileWriter("result.json"));
-            GsonUtil.gson().toJson(notMatched, new FileWriter("NotMatched.json"));
+            GsonUtil.gson().toJson(resultsMap, new FileWriter(outputFileName));
+//            GsonUtil.gson().toJson(notMatched, new FileWriter("NotMatched.json"));
         } catch (Exception e) {
             e.printStackTrace();
         }

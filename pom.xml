@@ -8,6 +8,24 @@
     <artifactId>sortable-assignment</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <executable>java</executable>
+                    <mainClass>ir.amv.snippets.sortable.Runner</mainClass>
+                    <arguments>
+                        <argument>data/listings.txt</argument>
+                        <argument>data/products.txt</argument>
+                        <argument>result.json</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
