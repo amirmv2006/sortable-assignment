@@ -1,5 +1,6 @@
 package ir.amv.snippets.sortable.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 public class Result {
 
     @SerializedName("product_name")
+    @JsonProperty("product_name")
     private String productName;
     private List<Listing> listings;
 

@@ -6,11 +6,9 @@ import ir.amv.snippets.sortable.model.Listing;
 import ir.amv.snippets.sortable.model.Product;
 import ir.amv.snippets.sortable.model.Result;
 
+import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by AMV on 5/1/2016.
@@ -40,27 +38,40 @@ public class Runner {
             }
             List<Listing> listings = GsonUtil.readFromFile(listingFileName, Listing.class);
             List<Product> products = GsonUtil.readFromFile(productsFileName, Product.class);
-            Map<String, Result> resultsMap = new HashMap<String, Result>();
+            List<Result> resultsList = new ArrayList<Result>();
             List<Listing> notMatched = new ArrayList<Listing>();
             ProductFinder finder = new ProductFinder(products);
-            for (Listing listing : listings) {
+            System.out.println("new Date() = " + new Date());
+            for (int i = 0; i < listings.size(); i++) {
+                Listing listing = listings.get(i);
+                long currentTimeMillis = System.currentTimeMillis();
                 Product product = finder.findProduct(listing);
+                System.out.println("Elapsed for finding product " + ((System.currentTimeMillis() - currentTimeMillis) / 1000));
                 if (product != null) {
                     String productName = product.getProductName();
-                    Result result = resultsMap.get(productName);
+                    Result result = null;
+                    for (Result stringListMap : resultsList) {
+                        if (stringListMap.getProductName().equals(productName)) {
+                            result = stringListMap;
+                        }
+                    }
                     if (result == null) {
                         result = new Result();
                         result.setProductName(productName);
                         result.setListings(new ArrayList<Listing>());
-                        resultsMap.put(productName, result);
+                        resultsList.add(result);
                     }
                     result.getListings().add(listing);
                 } else {
                     notMatched.add(listing);
                 }
+                if (i % 1000 == 0) {
+                    System.out.println("Handled " + i + " listings");
+                }
             }
-            GsonUtil.gson().toJson(resultsMap, new FileWriter(outputFileName));
-//            GsonUtil.gson().toJson(notMatched, new FileWriter("NotMatched.json"));
+            System.out.println("new Date() = " + new Date());
+            GsonUtil.toJson(resultsList, new FileOutputStream(outputFileName));
+            GsonUtil.toJson(notMatched, new FileOutputStream("NotMatched.json"));
         } catch (Exception e) {
             e.printStackTrace();
         }

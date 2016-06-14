@@ -69,6 +69,10 @@ public class WeightedMatcher
                     matched = true;
                     matchedCount+= 0.5;
                 }
+//                Integer listingTitleNumber = findNumber(listingTitle);
+//                Integer prodNameNumber = findNumber(productNameToken);
+//                if (matched && listingTitleNumber != null && prodNameNumber != null) {
+//                    if (listingTitleNumber.equals(prodNameNumber)) {
                 Pattern compile = Pattern.compile(".*?(\\d+).*");
                 Matcher listingTitleMatcher = compile.matcher(listingTitle);
                 Matcher productNameMatcher = compile.matcher(productNameToken);
@@ -84,6 +88,22 @@ public class WeightedMatcher
             }
         }
         return matchedCount / (double) productNameTokens.size();
+    }
+
+    private Integer findNumber(String listingTitle) {
+        String resultStr = "";
+        for (int i = 0; i < listingTitle.length(); i++) {
+            char c = listingTitle.charAt(i);
+            try {
+                Integer integer = Integer.valueOf("" + c);
+                resultStr += integer;
+            } catch (NumberFormatException e) {
+                if (resultStr.length() > 0) {
+                    break;
+                }
+            }
+        }
+        return resultStr.equals("") ? null : Integer.valueOf(resultStr);
     }
 
     private ArrayList<String> tokenize(String listingTitle) {
