@@ -22,6 +22,19 @@ public class WeightedMatcher
     public static final double PRODUCT_MODEL_WEIGHT = 30;
     public static final double MANUFACTURER_WEIGHT = 15;
 
+    /**
+     * this method will return a MatchResult after comparing a Product and a Listing. a resemblanceScore will be calculated
+     * for the match based on the properties that match and how they are matched. the matching will calculate the resemblanceScore
+     * for 4 properties and then return the weightedAverage for these 4 attributes, these for attributes and their weights are:
+     *      name        => 10
+     *      family      => 40
+     *      model       => 30
+     *      manufacturer=> 15
+     * these weights have been calculated based on experience, like the sample data for AI algorithms.
+     * @param product
+     * @param listing
+     * @return MatchResult containing resemblanceScore
+     */
     public MatchResult match(Product product, Listing listing) {
         List<Double> resemblances = new ArrayList<Double>();
         double productNameResemblance = getResemblanceScore(product.getProductName(), listing.getTitle());
@@ -52,9 +65,23 @@ public class WeightedMatcher
                 (resemblanceSum) / (PRODUCT_NAME_WEIGHT + PRODUCT_FAMILY_WEIGHT + PRODUCT_MODEL_WEIGHT + MANUFACTURER_WEIGHT));
     }
 
-    private double getResemblanceScore(String productName, String listingTitle) {
-        ArrayList<String> listingTitleTokens = tokenize(listingTitle);
-        ArrayList<String> productNameTokens = tokenize(productName);
+    /**
+     * Calculates the resemblanceScore between two attributes' value. first it splits the strings by the characters ' -_' and
+     * then foreach token,
+     * if it finds exact match will give score=1,
+     * if one of the tokens is starts with the other one, score=0.5
+     * regardless of these two, if there is the same number on both tokens the score will be increased by 1, and if there is
+     * a number on both strings, but doesn't match, the score will be decreased by 1. (if we have the same number on the tokens,
+     * they are most likely the same, and we have different numbers they are most likely different)
+     * So, the score for each token may be more than 1...
+     * then the sum of scores for each token will be divided to number of tokens on product attribute
+     * @param productAttribute
+     * @param listingAttribute
+     * @return
+     */
+    private double getResemblanceScore(String productAttribute, String listingAttribute) {
+        ArrayList<String> listingTitleTokens = tokenize(listingAttribute);
+        ArrayList<String> productNameTokens = tokenize(productAttribute);
         double matchedCount = 0;
         for (String listingTitleToken : listingTitleTokens) {
             for (String productNameToken : productNameTokens) {
@@ -74,7 +101,7 @@ public class WeightedMatcher
 //                if (matched && listingTitleNumber != null && prodNameNumber != null) {
 //                    if (listingTitleNumber.equals(prodNameNumber)) {
                 Pattern compile = Pattern.compile(".*?(\\d+).*");
-                Matcher listingTitleMatcher = compile.matcher(listingTitle);
+                Matcher listingTitleMatcher = compile.matcher(listingAttribute);
                 Matcher productNameMatcher = compile.matcher(productNameToken);
                 if (matched && listingTitleMatcher.matches() && productNameMatcher.matches()) {
                     String listingNumber = listingTitleMatcher.group(1);

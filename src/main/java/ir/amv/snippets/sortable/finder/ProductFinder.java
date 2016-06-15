@@ -21,6 +21,11 @@ public class ProductFinder {
         this.products = products;
     }
 
+    /**
+     * finds the Product matching the listing
+     * @param listing
+     * @return
+     */
     public Product findProduct(Listing listing) {
         IProductMatcher matcher = new WeightedMatcher();
         Map<Product, Double> matchedProducts = new HashMap<Product, Double>();
@@ -30,13 +35,14 @@ public class ProductFinder {
                 matchedProducts.put(product, matchResult.getResemblanceScore());
             }
         }
-        if (matchedProducts.size() == 1) {
+        if (matchedProducts.size() == 1) {  // if only one product is found, return it
             return matchedProducts.keySet().iterator().next();
         }
-        if (matchedProducts.size() > 1) {
+        if (matchedProducts.size() > 1) {   // if more than one product is found,
+                                            // return the product with max score if there is no other product with a close score
             Collection<Double> resemblanceScores = new ArrayList<Double>(matchedProducts.values());
-            Double max = Collections.max(resemblanceScores);
-            resemblanceScores.remove(max);
+            Double max = Collections.max(resemblanceScores); // get the max score
+            resemblanceScores.remove(max); // remove from the scores to find the minimum difference
             Double minDiff = Double.MAX_VALUE;
             for (Double resemblanceScore : resemblanceScores) {
                 double diff = max - resemblanceScore;
@@ -44,7 +50,7 @@ public class ProductFinder {
                     minDiff = diff;
                 }
             }
-            if (minDiff > 0.2) {
+            if (minDiff > 0.2) {// if minimum difference is more than 0.2, we can return the max score
                 for (Product product : matchedProducts.keySet()) {
                     if (matchedProducts.get(product) == max) {
                         return product;
@@ -52,7 +58,7 @@ public class ProductFinder {
                 }
             }
 //            System.out.println("{\"listing\":" + listing + ", \"matched\":" + matchedProducts.keySet());
-            return null;
+            return null; // when there are two products with very close scores, return none of them!
         }
         return null;
     }
