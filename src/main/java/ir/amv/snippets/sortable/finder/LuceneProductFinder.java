@@ -244,6 +244,7 @@ public class LuceneProductFinder {
 
     public Product findProduct(Listing listing, int i) throws IOException, ParseException {
         String title = listing.getTitle();
+        String origManf = listing.getManufacturer();
         try {
             if (title.toLowerCase().contains("for")) {
                 listing.setTitle(title.substring(0, title.toLowerCase().indexOf("for")));
@@ -359,6 +360,7 @@ public class LuceneProductFinder {
             return null;
         } finally {
             listing.setTitle(title);
+            listing.setManufacturer(origManf);
         }
     }
 
