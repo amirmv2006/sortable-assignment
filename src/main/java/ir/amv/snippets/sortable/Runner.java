@@ -1,13 +1,13 @@
 package ir.amv.snippets.sortable;
 
+import ir.amv.snippets.sortable.finder.LuceneProductFinder;
 import ir.amv.snippets.sortable.finder.ProductFinder;
 import ir.amv.snippets.sortable.json.GsonUtil;
 import ir.amv.snippets.sortable.model.Listing;
 import ir.amv.snippets.sortable.model.Product;
 import ir.amv.snippets.sortable.model.Result;
 
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -38,17 +38,19 @@ public class Runner {
             }
             List<Listing> listings = GsonUtil.readFromFile(listingFileName, Listing.class);
             List<Product> products = GsonUtil.readFromFile(productsFileName, Product.class);
+
             List<Result> resultsList = new ArrayList<Result>();
             List<Listing> notMatched = new ArrayList<Listing>();
-            ProductFinder finder = new ProductFinder(products);
+
+            LuceneProductFinder luceneProductFinder = new LuceneProductFinder(products, listings);
             System.out.println("new Date() = " + new Date());
+
             for (int i = 0; i < listings.size(); i++) {
                 Listing listing = listings.get(i);
                 long currentTimeMillis = System.currentTimeMillis();
-                Product product = finder.findProduct(listing);
-                System.out.println("Elapsed for finding product " + ((System.currentTimeMillis() - currentTimeMillis) / 1000));
-                if (product != null) {
-                    String productName = product.getProductName();
+                Product luceneProduct = luceneProductFinder.findProduct(listing, i);
+                if (luceneProduct != null) {
+                    String productName = luceneProduct.getProductName();
                     Result result = null;
                     for (Result stringListMap : resultsList) {
                         if (stringListMap.getProductName().equals(productName)) {
@@ -75,5 +77,23 @@ public class Runner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void generateCSV(List<Object[]> data, FileOutputStream fileOutputStream, String header) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
+        writer.write(header);
+        writer.newLine();
+        int i = -1;
+        for (Object[] objects : data) {
+            i++;
+            StringJoiner stringJoiner = new StringJoiner(",");
+            for (Object object : objects) {
+                stringJoiner.add(String.valueOf(object).replaceAll(",", "_"));
+            }
+            writer.write(stringJoiner.toString());
+            writer.newLine();
+        }
+        writer.flush();
+        writer.close();
     }
 }
